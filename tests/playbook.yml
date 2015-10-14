@@ -1,7 +1,7 @@
 ---
 
 - name: Install CRM
-  hosts: w2012
+  hosts: w2007
   gather_facts: false
   roles:
     - { role: jenkins,
