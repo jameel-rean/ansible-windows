@@ -1,0 +1,5 @@
+Param(
+[string] $domainName
+)
+
+Rename-Computer -NewName $domainName-Force

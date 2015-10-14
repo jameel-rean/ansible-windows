@@ -1,0 +1,10 @@
+---
+
+- name: Install CRM
+  hosts: w2012
+  gather_facts: false
+  roles:
+    - { role: ansible-role-reanrm,
+        domainName: "rptbox",
+        dnsIP: "172X31X33X95" }
+

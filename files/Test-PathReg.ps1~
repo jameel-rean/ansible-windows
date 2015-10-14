@@ -1,0 +1,38 @@
+param
+(
+[Parameter(mandatory=$true,position=0)]
+[string]$Path
+,
+[Parameter(mandatory=$true,position=1)]
+[string]$Property,
+[string]$isoDrive
+)
+<#
+
+.Synopsis
+	Validates the existence of a registry key
+.Description
+	This function searches for the registry value (Property attribute) under the given registry key (Path attribute) and returns $true if it exists
+.Parameter Path
+	Specifies the Registry path
+.Parameter Property
+	Specifies the name of the registry property that will be searched for under the given Registry path
+.Example
+Test-PathReg -Path HKLM:\SYSTEM\CurrentControlSet\services\Tcpip\Parameters -Property Hostname
+.Link
+	http://blogs.msdn.com/candede
+.Notes
+	Author: Can Dedeoglu
+#>
+
+$compare = (Get-ItemProperty -LiteralPath $Path).psbase.members | %{$_.name} | compare $Property -IncludeEqual -ExcludeDifferent
+if($compare.SideIndicator -like "==") 
+    {
+        return $true
+    }
+else
+    {
+        return $false
+    }
+
+

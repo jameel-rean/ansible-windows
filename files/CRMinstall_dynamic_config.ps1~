@@ -1,0 +1,231 @@
+Param([object[]] $parameters)
+#Param([string]$roles, [string]$sqlServerName, [string]$reportingURL, [string]$orgName, [string]$defaultWeb, [string]$defaultPort, [string]$defaultOU, [string]$preferredDC, [string]$adminUser, [string]$adminPassword, [string]$isoDrive )
+#$roles = "APP,ASYNC,RS,DM"
+
+$roles = $parameters[0]
+$sqlServerName = $parameters[1]
+$reportingURL = $parameters[2]
+$orgName = $parameters[3]
+$defaultWeb = $parameters[4]
+$webPort = $parameters[5]
+$defaultOU = $parameters[6]
+$preferredDC = $parameters[7]
+$adminUser = $parameters[8]
+$adminPassword = $parameters[9]
+$isoDrive = $parameters[10]
+
+cd $isoDrive
+
+$roles = $roles.split(',')
+
+#Check if CRM is installed
+If (Test-Path "HKLM:\Software\Microsoft\MSCRM") {
+"CRM Installed. Skip step to install CRM and move on to next step."
+}
+Else{
+
+    $ErrorActionPreference = "stop"
+
+    $xmlOut = "c:\installers\crminstall.xml"
+    #$xmlOut = "crminstall.xml"
+    $wgExt = 60001
+
+    # Create The Document
+    $XmlWriter = New-Object System.XMl.XmlTextWriter($xmlOut,$Null)
+    # Set The Formatting
+    $xmlWriter.Formatting = "Indented"
+    $xmlWriter.Indentation = "4"
+    # Write the XML Decleration
+    $xmlWriter.WriteStartDocument()
+    # Set the XSL
+    $XSLPropText = "type='text/xsl' href='style.xsl'"
+    $xmlWriter.WriteProcessingInstruction("xml-stylesheet", $XSLPropText)
+    # Write Root Element
+    $xmlWriter.WriteStartElement("CRMSetup")
+    # Write the Document
+    $xmlWriter.WriteStartElement("Server")
+    $xmlWriter.WriteStartElement("Patch")
+    $xmlWriter.WriteAttributeString("Update","false")
+    #$xmlWriter.WriteString("\\ad.admin\crmsoftware\2012Install\Server\Server_KB2434455_amd64_1033.msp")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteElementString("LicenseKey","CDD6B-CN4GY-GG84K-MWQFV-G6MYH")
+    $xmlWriter.WriteElementString("SqlServer","$sqlServerName")
+
+    If($roles.Contains('APP')){
+    	$xmlWriter.WriteStartElement("Database")
+    	$xmlWriter.WriteAttributeString("create","true")
+    }
+    Else{
+    	$xmlWriter.WriteStartElement("Database")
+    	$xmlWriter.WriteAttributeString("create","false")
+    }
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("Reporting")
+    $xmlWriter.WriteAttributeString("URL","$reportingURL")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteElementString("OrganizationCollation","Latin1_General_CI_AI")
+    $xmlWriter.WriteStartElement("basecurrency")
+    $xmlWriter.WriteAttributeString("isocurrencycode","USD")
+    $xmlWriter.WriteAttributeString("currencyname","US Dollar")
+    $xmlWriter.WriteAttributeString("currencysymbol","$")
+    $xmlWriter.WriteAttributeString("currencyprecision","2")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteElementString("Organization","$orgName")
+    $xmlWriter.WriteElementString("OrganizationUniqueName","$orgName")
+    $xmlWriter.WriteElementString("OU","$defaultOU")
+    $xmlWriter.WriteElementString("PreferredDC","$preferredDC") 
+    $xmlWriter.WriteStartElement("WebsiteUrl")
+    $xmlWriter.WriteAttributeString("create","true")
+    $xmlWriter.WriteAttributeString("port","$webPort")
+    $xmlWriter.WriteString("$defaultWeb")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteElementString("InstallDir","C:\Program Files\Microsoft Dynamics CRM")
+    $xmlWriter.WriteStartElement("CrmServiceAccount")
+    $xmlWriter.WriteAttributeString("type","DomainUser")
+    $xmlWriter.WriteElementString("ServiceAccountLogin", "$adminUser")
+    $xmlWriter.WriteElementString("ServiceAccountPassword","$adminPassword")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("SandboxServiceAccount")
+    $xmlWriter.WriteAttributeString("type","DomainUser")
+    $xmlWriter.WriteElementString("ServiceAccountLogin", "$adminUser")
+    $xmlWriter.WriteElementString("ServiceAccountPassword","$adminPassword")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("DeploymentServiceAccount")
+    $xmlWriter.WriteAttributeString("type","DomainUser")
+    $xmlWriter.WriteElementString("ServiceAccountLogin", "$adminUser")
+    $xmlWriter.WriteElementString("ServiceAccountPassword","$adminPassword")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("AsyncServiceAccount")
+    $xmlWriter.WriteAttributeString("type","DomainUser")
+    $xmlWriter.WriteElementString("ServiceAccountLogin", "$adminUser")
+    $xmlWriter.WriteElementString("ServiceAccountPassword","$adminPassword")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("MonitoringServiceAccount")
+    $xmlWriter.WriteAttributeString("type","DomainUser")
+    $xmlWriter.WriteElementString("ServiceAccountLogin", "$adminUser")
+    $xmlWriter.WriteElementString("ServiceAccountPassword","$adminPassword")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("VssWriterServiceAccount")
+    $xmlWriter.WriteAttributeString("type","DomainUser")
+    $xmlWriter.WriteElementString("ServiceAccountLogin", "$adminUser")
+    $xmlWriter.WriteElementString("ServiceAccountPassword","$adminPassword")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("SQM")
+    $xmlWriter.WriteAttributeString("optin","false")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("muoptin")
+    $xmlWriter.WriteAttributeString("optin","false")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("Email")
+    $xmlWriter.WriteStartElement("IncomingExchangeServer")
+    $xmlWriter.WriteAttributeString("name","$sqlServerName")
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteStartElement("Roles")
+    If($roles.Contains('APP')){
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","WebApplicationServer")
+    	$xmlWriter.WriteEndElement()
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","OrganizationWebService")
+    	$xmlWriter.WriteEndElement()
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","DiscoveryWebService")
+    	$xmlWriter.WriteEndElement()
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","HelpServer")
+    	$xmlWriter.WriteEndElement()
+    }
+    If($roles.Contains('ASYNC')){
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","AsynchronousProcessingService")
+    	$xmlWriter.WriteEndElement()
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","EmailIntegrationService")
+    	$xmlWriter.WriteEndElement()
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","SandboxProcessingService")
+    	$xmlWriter.WriteEndElement()
+    }
+    If($roles.Contains('DM')){
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","DeploymentTools")
+    	$xmlWriter.WriteEndElement()
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","DeploymentWebService")
+    	$xmlWriter.WriteEndElement()
+    	$xmlWriter.WriteStartElement("Role")
+    	$xmlWriter.WriteAttributeString("Name","VSSWriterService")
+    	$xmlWriter.WriteEndElement()
+    }
+    	
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteEndElement()
+    $xmlWriter.WriteEndDocument() 
+    $xmlWriter.Finalize
+    $xmlWriter.Flush
+    $xmlWriter.Close()
+
+    #Run CRM Install
+    #.\Server\amd64\SetupServer.exe /Q /config C:\Installers\CrmConfig_aws.xml /L C:\Installers\CrmInstallLog.txt
+    $process = ".\Server\amd64\SetupServer.exe"
+    $args = "/Q /config c:\installers\crminstall.xml /L C:\Installers\CrmInstallLog.txt"
+    Start-Process $process -ArgumentList $args -Wait
+}
+
+If($roles.Contains('RS')){
+
+    #Test for RS 
+    If (C:\installers\Test-PathReg.ps1 -Path "HKLM:\Software\Microsoft\MSCRM" -Property "CRM_SrsDataConnector_Version")
+    {
+    "CRM Reporting ExtensionsInstalled. Skip step to install CRM Reporting extensions and move on to next step."
+    }
+    Else{
+
+        $xmlOut = "c:\installers\crmrsinstall.xml"
+
+
+        # Create The Document
+        $XmlWriter = New-Object System.XMl.XmlTextWriter($xmlOut,$Null)
+        # Set The Formatting
+        $xmlWriter.Formatting = "Indented"
+        $xmlWriter.Indentation = "4"
+        # Write the XML Decleration
+        $xmlWriter.WriteStartDocument()
+        # Set the XSL
+        $XSLPropText = "type='text/xsl' href='style.xsl'"
+        $xmlWriter.WriteProcessingInstruction("xml-stylesheet", $XSLPropText)
+        # Write Root Element
+        $xmlWriter.WriteStartElement("CRMSetup")
+        $xmlWriter.WriteStartElement("srsdataconnector")
+        $xmlWriter.WriteElementString("configdbserver","$sqlServerName")
+        $xmlWriter.WriteElementString("autogroupmanagementoff", "0")
+        $xmlWriter.WriteElementString("instancename", "MSSQLSERVER")
+        $xmlWriter.WriteStartElement("Patch")
+        $xmlWriter.WriteAttributeString("Update","false")
+        $xmlWriter.WriteEndElement()
+        $xmlWriter.WriteStartElement("muoptin")
+        $xmlWriter.WriteAttributeString("optin","false")
+        $xmlWriter.WriteEndElement()
+        $xmlWriter.WriteStartElement("MonitoringServiceAccount")
+        $xmlWriter.WriteAttributeString("type","DomainUser")
+        $xmlWriter.WriteElementString("ServiceAccountLogin", "$adminUser")
+        $xmlWriter.WriteElementString("ServiceAccountPassword","$adminPassword")
+        $xmlWriter.WriteEndElement()
+
+        $xmlWriter.WriteEndElement()
+        $xmlWriter.WriteEndElement()
+        $xmlWriter.WriteEndDocument() 
+        $xmlWriter.Finalize
+        $xmlWriter.Flush
+        $xmlWriter.Close()
+
+
+        #Run SSRS Install
+        #.\Server\amd64\SrsDataConnector\SetupSrsDataConnector.exe /Q /CONFIG c:\CrmSrsConfig_aws.xml /L c:\Installers\SRSinstalllog.txt
+        $process = ".\Server\amd64\SrsDataConnector\SetupSrsDataConnector.exe"
+        $args = "/Q /CONFIG c:\installers\crmrsinstall.xml /L c:\Installers\SRSinstalllog.txt"
+        Start-Process $process -ArgumentList $args -Wait
+    }
+}

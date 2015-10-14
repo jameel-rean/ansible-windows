@@ -1,0 +1,1 @@
+Read-S3Object -BucketName ecrm-prebake -Key CrmConfig_crmadmin_localasync_localdb.xml -File c:\ilp\bootstrap.ps1

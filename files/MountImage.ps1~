@@ -1,0 +1,9 @@
+Param([object[]] $parameters)
+﻿#Param([string]$imagePath)
+$imagePath = $parameters[0]
+Mount-DiskImage -ImagePath $imagePath
+$iSOImage = Get-DiskImage -ImagePath $imagePath | Get-Volume
+$iSODrive = "$([string]$iSOImage.DriveLetter):"
+#cd $iSODrive
+
+return $iSODrive

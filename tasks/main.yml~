@@ -1,0 +1,20 @@
+---
+
+
+
+- name: Join Domain
+  script: Join.ps1 {{dnsIP}}
+
+- name: Reboot Windows
+  raw: shutdown -r -f
+
+- name: wait for windows system reboot
+  local_action:
+    module: wait_for
+    host: "{{ ansible_ssh_host|default(inventory_hostname) }}"
+    port: "{{ ansible_ssh_port|default(5985) }}"
+    delay: 30
+    timeout: 600
+    state: started 
+
+

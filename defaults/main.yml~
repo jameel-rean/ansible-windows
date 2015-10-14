@@ -1,0 +1,45 @@
+---
+
+# s3 bucket name
+s3bucket: "ellucian-drafts"
+
+# installers folder name in s3
+ecrm_installers: "CRM"
+
+# destination folder
+installers_destination: "C:\\Installers"
+
+# Installation Defaults
+
+roles: "APP,ASYNC,DM"
+
+sqlServerName: "devops2.ecrm.local"
+
+reportingURL: "http://devops2.ecrm.local/ReportServer"
+
+orgName: "TestOrg01"
+
+defaultWeb: "Default"
+
+adminUser: "ecrm\\crmadmin"
+
+adminPassword: "R3cruit3r"
+
+# domain user
+runAsUser: "ecrm\\crmadmin"
+
+# domain user pwd
+runAsPassword: "R3cruit3r"
+
+# FQDN default value is None
+sysFQDN: "*.greatvalleyu.com"
+
+defaultPort: "80"
+
+defaultOU: "OU=TST01,DC=ecrm,DC=local"
+
+preferredDC: "ecrm.local"
+
+domainName: 
+
+dnsIP: 
